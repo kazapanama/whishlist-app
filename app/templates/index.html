@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Головна - Список бажань{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Список бажаних подарунків</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for product in products %}
+    <div class="col">
+        <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="text-decoration-none">
+            <div class="card h-100 {% if product.is_gifted %}border-success bg-light{% endif %}">
+                <img src="{{ product.image }}" class="card-img-top" alt="{{ product.title }}">
+                <div class="card-body">
+                    <h5 class="card-title text-dark">{{ product.title }}</h5>
+                    {% if product.is_gifted %}
+                    <span class="badge bg-success">Подаровано</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            Поки що немає елементів у списку бажань.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Додати новий елемент{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3>Додати новий елемент у список бажань</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.add_product') }}">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Назва *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="image" class="form-label">URL зображення *</label>
+                        <input type="url" class="form-control" id="image" name="image" required>
+                        <div class="form-text">Введіть пряме посилання на зображення (наприклад, https://example.com/image.jpg)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="url" class="form-label">URL товару</label>
+                        <input type="url" class="form-control" id="url" name="url">
+                        <div class="form-text">Необов'язкове посилання на товар</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.admin_index') }}" class="btn btn-secondary">Скасувати</a>
+                        <button type="submit" class="btn btn-primary">Додати елемент</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

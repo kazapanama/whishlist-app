@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <img src="{{ product.image }}" class="img-fluid rounded" alt="{{ product.title }}">
+    </div>
+    <div class="col-md-6">
+        <h1>{{ product.title }}</h1>
+        
+        {% if product.url %}
+        <p>
+            <a href="{{ product.url }}" target="_blank" class="btn btn-outline-primary">Переглянути товар онлайн</a>
+        </p>
+        {% endif %}
+        
+        {% if product.is_gifted %}
+        <div class="alert alert-success">
+            <h4>Цей подарунок вже подаровано!</h4>
+        </div>
+        {% else %}
+        <button id="giftBtn" class="btn btn-success btn-lg mt-3">Подарувати</button>
+        
+        <div id="confirmationModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Підтвердження</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Ви впевнені, що хочете подарувати "{{ product.title }}"?</p>
+                        <p>Цю дію не можна відмінити.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                        <button id="confirmGiftBtn" type="button" class="btn btn-success">Так, подарувати</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <p class="mt-4">
+            <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">Назад до списку</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if not product.is_gifted %}
+<script>
+    $(document).ready(function() {
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        
+        $('#giftBtn').click(function() {
+            modal.show();
+        });
+        
+        $('#confirmGiftBtn').click(function() {
+            $.ajax({
+                url: "{{ url_for('main.gift_product', product_id=product.id) }}",
+                method: 'POST',
+                success: function(response) {
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        alert(response.message || 'Виникла помилка');
+                        modal.hide();
+                    }
+                },
+                error: function() {
+                    alert('Виникла помилка');
+                    modal.hide();
+                }
+            });
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

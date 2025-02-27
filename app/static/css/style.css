@@ -1,0 +1,37 @@
+/* Custom styles for the wishlist app */
+
+body {
+    padding-top: 2rem;
+}
+
+.card {
+    transition: transform 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Styling for gifted items */
+.card.border-success {
+    border-width: 2px;
+}
+
+.badge {
+    margin-left: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-img-top {
+        height: 160px;
+    }
+}
