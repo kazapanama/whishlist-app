@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='../static')
     
     # Use environment variable for production or default for development
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///wishlist.db')
@@ -14,6 +14,13 @@ def create_app():
     
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
+    
+    # Configure upload folder
+    app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'uploads')
+    app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
+    
+    # Ensure the upload directory exists
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
     db.init_app(app)
     

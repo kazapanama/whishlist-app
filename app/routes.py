@@ -1,9 +1,26 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, current_app
 from app.models import Product
 from app import db
+import os
+import uuid
+from werkzeug.utils import secure_filename
 
 main_bp = Blueprint('main', __name__)
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
+           
+def save_image(file):
+    if file and allowed_file(file.filename):
+        # Generate a unique filename to prevent collisions
+        filename = str(uuid.uuid4()) + secure_filename(file.filename)
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        # Return the path relative to the static folder for use in templates
+        return f'/static/uploads/{filename}'
+    return None
 
 @main_bp.route('/')
 def index():
@@ -36,14 +53,30 @@ def admin_index():
 def add_product():
     if request.method == 'POST':
         title = request.form.get('title')
-        image = request.form.get('image')
         url = request.form.get('url')
         
-        if not title or not image:
-            flash('Назва та зображення обов\'язкові', 'error')
+        if not title:
+            flash('Назва обов\'язкова', 'error')
             return redirect(url_for('admin.add_product'))
         
-        product = Product(title=title, image=image, url=url)
+        # Handle image upload
+        if 'image' not in request.files:
+            flash('Зображення обов\'язкове', 'error')
+            return redirect(url_for('admin.add_product'))
+            
+        image_file = request.files['image']
+        
+        if image_file.filename == '':
+            flash('Зображення не вибрано', 'error')
+            return redirect(url_for('admin.add_product'))
+        
+        image_path = save_image(image_file)
+        
+        if not image_path:
+            flash('Непідтримуваний формат файлу. Дозволені формати: png, jpg, jpeg, gif', 'error')
+            return redirect(url_for('admin.add_product'))
+        
+        product = Product(title=title, image=image_path, url=url)
         db.session.add(product)
         db.session.commit()
         
@@ -58,9 +91,19 @@ def edit_product(product_id):
     
     if request.method == 'POST':
         product.title = request.form.get('title')
-        product.image = request.form.get('image')
         product.url = request.form.get('url')
         product.is_gifted = 'is_gifted' in request.form
+        
+        # Handle image upload if a new image is provided
+        if 'image' in request.files and request.files['image'].filename != '':
+            image_file = request.files['image']
+            image_path = save_image(image_file)
+            
+            if image_path:
+                # If there was a successful upload, update the image path
+                product.image = image_path
+            else:
+                flash('Непідтримуваний формат файлу. Зображення не було оновлено.', 'warning')
         
         db.session.commit()
         flash('Елемент успішно оновлено', 'success')
